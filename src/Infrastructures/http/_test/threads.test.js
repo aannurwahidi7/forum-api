@@ -234,6 +234,6 @@ describe('/threads endpoint', () => {
     expect(response.statusCode).toEqual(401);
     expect(responseJson.status).toEqual('fail');
     expect(responseJson.message).toBeDefined();
-    expect(responseJson.message).toEqual('tidak dapat memproses lebih lanjut, user belum melakukan login');
+    expect(responseJson.message).toEqual('Missing authentication');
   });
 });

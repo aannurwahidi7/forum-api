@@ -5,7 +5,7 @@ const InvariantError = require('../InvariantError');
 describe('DomainErrorTranslator', () => {
   it('should translate error correctly', () => {
     expect(DomainErrorTranslator.translate(new Error('Missing authentication')))
-      .toStrictEqual(new AuthenticationError('tidak dapat memproses lebih lanjut, user belum melakukan login'));
+      .toStrictEqual(new AuthenticationError('Missing authentication'));
     expect(DomainErrorTranslator.translate(new Error('REGISTER_USER.NOT_CONTAIN_NEEDED_PROPERTY')))
       .toStrictEqual(new InvariantError('tidak dapat membuat user baru karena properti yang dibutuhkan tidak ada'));
     expect(DomainErrorTranslator.translate(new Error('REGISTER_USER.NOT_MEET_DATA_TYPE_SPECIFICATION')))

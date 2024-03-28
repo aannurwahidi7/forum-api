@@ -58,7 +58,7 @@ describe('Reply', () => {
       is_delete: true,
     };
 
-    const actualContent = '**Balasan telah dihapus**';
+    const actualContent = '**balasan telah dihapus**';
 
     // Action
     const reply = new Reply(payload);

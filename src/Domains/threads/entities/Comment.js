@@ -7,7 +7,7 @@ class Comment {
     this.id = payload.id;
     this.username = payload.username;
     this.date = payload.date;
-    this.content = (payload.is_delete) ? '**Komentar telah dihapus**' : payload.content;
+    this.content = (payload.is_delete) ? '**komentar telah dihapus**' : payload.content;
     this.replies = payload.replies;
   }
 

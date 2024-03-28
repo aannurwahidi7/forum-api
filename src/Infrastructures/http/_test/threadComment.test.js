@@ -163,7 +163,7 @@ describe('/threads/{threadId}/comments endpoint', () => {
     expect(response.statusCode).toEqual(401);
     expect(responseJson.status).toEqual('fail');
     expect(responseJson.message).toBeDefined();
-    expect(responseJson.message).toEqual('tidak dapat memproses lebih lanjut, user belum melakukan login');
+    expect(responseJson.message).toEqual('Missing authentication');
   });
   it('should response 404 when thread not found', async () => {
     // Arrange

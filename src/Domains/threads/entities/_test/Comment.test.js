@@ -62,7 +62,7 @@ describe('Comment', () => {
       is_delete: true,
     };
 
-    const actualContent = '**Komentar telah dihapus**';
+    const actualContent = '**komentar telah dihapus**';
 
     // Action
     const comment = new Comment(payload);

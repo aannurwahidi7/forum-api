@@ -7,7 +7,7 @@ class Reply {
     this.id = payload.id;
     this.username = payload.username;
     this.date = payload.date;
-    this.content = (payload.is_delete) ? '**Balasan telah dihapus**' : payload.content;
+    this.content = (payload.is_delete) ? '**balasan telah dihapus**' : payload.content;
   }
 
   _verifyPayload(payload) {
