@@ -7,11 +7,13 @@ const ThreadCommentsTableTestHelper = {
     id = 'comment-123', content = 'sebuah komentar', date = '2021-08-08T07:19:09.775Z', is_delete = false, owner, thread_id,
   }) {
     const query = {
-      text: 'INSERT INTO thread_comments VALUES ($1, $2, $3, $4, $5, $6)',
+      text: 'INSERT INTO thread_comments VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
       values: [id, content, date, is_delete, owner, thread_id],
     };
 
-    await pool.query(query);
+    const result = await pool.query(query);
+
+    return result.rows[0].id;
   },
 
   async findCommentById(id) {

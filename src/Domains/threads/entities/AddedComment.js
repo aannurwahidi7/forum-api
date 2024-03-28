@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 class AddedComment {
-  constructor(payload) {
-    this._verifyPayload(payload);
+  constructor(payload, name) {
+    this._verifyPayload(payload, name);
 
     const { id, content, owner } = payload;
 
@@ -10,13 +10,13 @@ class AddedComment {
     this.owner = owner;
   }
 
-  _verifyPayload({ id, content, owner }) {
+  _verifyPayload({ id, content, owner }, name) {
     if (!id || !content || !owner) {
-      throw new Error('ADDED_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
+      throw new Error(`${name}.NOT_CONTAIN_NEEDED_PROPERTY`);
     }
 
     if (typeof id !== 'string' || typeof content !== 'string' || typeof owner !== 'string') {
-      throw new Error('ADDED_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
+      throw new Error(`${name}.NOT_MEET_DATA_TYPE_SPECIFICATION`);
     }
   }
 }

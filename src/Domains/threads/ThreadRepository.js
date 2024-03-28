@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable class-methods-use-this */
 
-/* INTERFACE */
+/* ABSTRACT CLASS */
 class ThreadRepository {
   async addThread(addedThread, owner) {
     throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');

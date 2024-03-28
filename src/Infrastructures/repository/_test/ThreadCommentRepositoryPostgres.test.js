@@ -2,6 +2,9 @@
 const pool = require('../../database/postgres/pool');
 
 const InvariantError = require('../../../Commons/exceptions/InvariantError');
+const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
+const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
+
 const AddedComment = require('../../../Domains/threads/entities/AddedComment');
 const NewComment = require('../../../Domains/threads/entities/NewComment');
 
@@ -9,8 +12,6 @@ const ThreadCommentRepositoryPostgres = require('../ThreadCommentRepositoryPostg
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const ThreadCommentsTableTestHelper = require('../../../../tests/ThreadCommentsTableTestHelper');
-const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
-const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 
 describe('ThreadCommentRepositoryPostgres', () => {
   let userId;
@@ -33,11 +34,11 @@ describe('ThreadCommentRepositoryPostgres', () => {
   });
 
   describe('addComment function', () => {
-    it('should persist new thread and return added thread correctly', async () => {
+    it('should persist new comment and return added comment correctly', async () => {
       // Arrange
       const newThread = new NewComment({
         content: 'sebuah comment',
-      });
+      }, 'NEW_COMMENT');
       const fakeIdGenerator = () => '123'; // stub!
       const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
 
@@ -53,7 +54,7 @@ describe('ThreadCommentRepositoryPostgres', () => {
       // Arrange
       const newThread = new NewComment({
         content: 'sebuah komentar',
-      });
+      }, 'NEW_COMMENT');
       const fakeIdGenerator = () => '123'; // stub!
       const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
 
@@ -65,7 +66,7 @@ describe('ThreadCommentRepositoryPostgres', () => {
         id: 'comment-123',
         content: 'sebuah komentar',
         owner: 'user-123',
-      }));
+      }, 'ADDED_COMMENT'));
     });
   });
 
@@ -80,13 +81,14 @@ describe('ThreadCommentRepositoryPostgres', () => {
         .toThrowError(InvariantError);
     });
 
-    it('should return id, content, date, owner when thread is found', async () => {
+    it('should return id, content, date, owner and is_delete when comment is found', async () => {
       // Arrange
       const expectedPayload = {
         id: 'comment-123',
         content: 'sebuah komentar',
         date: '2021-08-08T07:19:09.775Z',
         owner: userId,
+        is_delete: false,
       };
       const fakeIdGenerator = () => '123'; // stub!
       const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
@@ -131,7 +133,7 @@ describe('ThreadCommentRepositoryPostgres', () => {
       await threadCommentRepositoryPostgres.deleteCommentById(expectedPayload.id);
       const comment = await threadCommentRepositoryPostgres.getCommentById(expectedPayload.id);
 
-      expect(comment.content).toEqual('**Komentar telah dihapus**');
+      expect(comment.is_delete).toEqual(true);
     });
   });
   describe('verifyComment', () => {
@@ -140,11 +142,37 @@ describe('ThreadCommentRepositoryPostgres', () => {
       const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, {});
 
       // Action & Assert
-      return expect(threadCommentRepositoryPostgres.verifyComment('comment-123', 'user-123'))
+      return expect(threadCommentRepositoryPostgres.verifyComment('comment-123'))
         .rejects
         .toThrowError(NotFoundError);
     });
+  });
 
+  describe('getCommentByThreadId', () => {
+    it('should return list id, username, date, content, is_delete when comments are found', async () => {
+      // Arrange
+      const { username: userN } = await UsersTableTestHelper.findUsernameById(userId);
+      const expectedPayload = {
+        id: 'comment-123',
+        username: userN,
+        date: '2021-08-08T07:19:09.775Z',
+        content: 'sebuah komentar',
+        is_delete: false,
+      };
+      const fakeIdGenerator = () => '123'; // stub!
+      const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
+      await ThreadCommentsTableTestHelper.addComment({
+        owner: userId,
+        thread_id: threadId,
+      });
+
+      // Action & Assert
+      const data = await threadCommentRepositoryPostgres.getCommentByThreadId(threadId);
+      expect(data[0]).toEqual(expectedPayload);
+    });
+  });
+
+  describe('verifyCommentOwner', () => {
     it('should throw AuthorizationError when other user try to accessing to it', async () => {
       // Arrange
       const fakeIdGenerator = () => '123'; // stub!
@@ -155,7 +183,7 @@ describe('ThreadCommentRepositoryPostgres', () => {
       });
 
       // Action & Assert
-      return expect(threadCommentRepositoryPostgres.verifyComment('comment-123', 'user-321'))
+      return expect(threadCommentRepositoryPostgres.verifyCommentOwner('comment-123', 'user-321'))
         .rejects
         .toThrowError(AuthorizationError);
     });

@@ -6,7 +6,7 @@ describe('a NewComment entities', () => {
     const payload = {};
 
     // Action & Assert
-    expect(() => new NewComment(payload)).toThrowError('NEW_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
+    expect(() => new NewComment(payload, 'NEW_COMMENT')).toThrowError('NEW_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
   });
   it('should throw error when payload not meet data type specification', () => {
     // Arrange
@@ -15,7 +15,7 @@ describe('a NewComment entities', () => {
     };
 
     // Action & Assert
-    expect(() => new NewComment(payload)).toThrowError('NEW_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
+    expect(() => new NewComment(payload, 'NEW_COMMENT')).toThrowError('NEW_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
   it('should create NewAuth entities correctly', () => {
@@ -25,7 +25,7 @@ describe('a NewComment entities', () => {
     };
 
     // Action
-    const newComment = new NewComment(payload);
+    const newComment = new NewComment(payload, 'NEW_COMMENT');
 
     // Assert
     expect(newComment).toBeInstanceOf(NewComment);

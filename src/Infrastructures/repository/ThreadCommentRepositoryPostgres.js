@@ -24,12 +24,12 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
 
     const result = await this._pool.query(query);
 
-    return new AddedComment({ ...result.rows[0] });
+    return new AddedComment({ ...result.rows[0] }, 'ADDED_COMMENT');
   }
 
   async getCommentById(id) {
     const query = {
-      text: 'SELECT id, content, date, owner FROM thread_comments WHERE id = $1',
+      text: 'SELECT id, content, date, owner, is_delete FROM thread_comments WHERE id = $1',
       values: [id],
     };
 
@@ -43,11 +43,9 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
   }
 
   async deleteCommentById(id) {
-    const isDelete = true;
-    const newComment = '**Komentar telah dihapus**';
     const query = {
-      text: 'UPDATE thread_comments SET is_delete = $1, content = $2 WHERE id = $3 RETURNING id',
-      values: [isDelete, newComment, id],
+      text: 'UPDATE thread_comments SET is_delete = true WHERE id = $1 RETURNING id',
+      values: [id],
     };
 
     const result = await this._pool.query(query);
@@ -57,7 +55,7 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
     }
   }
 
-  async verifyComment(id, owner) {
+  async verifyComment(id) {
     const query = {
       text: 'SELECT * FROM thread_comments WHERE id = $1',
       values: [id],
@@ -69,9 +67,35 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
       throw new NotFoundError('komentar tidak ditemukan');
     }
 
-    if (result.rows[0].owner !== owner) {
+    return result.rows[0].owner;
+  }
+
+  async verifyCommentOwner(id, owner) {
+    const curOwner = await this.verifyComment(id);
+
+    if (curOwner !== owner) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
     }
+  }
+
+  async getCommentByThreadId(threadId) {
+    const query = {
+      text: `SELECT
+              tc.id,
+              u.username,
+              tc.date,
+              tc.is_delete,
+              tc.content
+            FROM thread_comments tc
+            INNER JOIN users u ON tc.owner = u.id
+            WHERE tc.thread_id = $1
+            GROUP BY tc.id, u.username ORDER BY tc.date`,
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows;
   }
 }
 

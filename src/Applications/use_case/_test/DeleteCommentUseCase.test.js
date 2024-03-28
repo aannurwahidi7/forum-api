@@ -2,8 +2,8 @@ const ThreadCommentRepository = require('../../../Domains/threads/ThreadCommentR
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const DeleteCommentUseCase = require('../DeleteCommentUseCase');
 
-describe('DeleteAuthenticationUseCase', () => {
-  it('should orchestrating the delete authentication action correctly', async () => {
+describe('DeleteCommentUseCase', () => {
+  it('should orchestrating the delete comment action correctly', async () => {
     // Arrange
     const credId = 'user-123';
     const threadId = 'thread-123';
@@ -16,7 +16,7 @@ describe('DeleteAuthenticationUseCase', () => {
     /** mocking needed function */
     mockThreadRepository.verifyThreadById = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockCommentRepository.verifyComment = jest.fn()
+    mockCommentRepository.verifyCommentOwner = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.deleteCommentById = jest.fn()
       .mockImplementation(() => Promise.resolve());
@@ -29,8 +29,9 @@ describe('DeleteAuthenticationUseCase', () => {
     // Action
     await deleteCommentUseCase.execute(credId, threadId, commentId);
 
+    // Assert
     expect(mockThreadRepository.verifyThreadById).toBeCalledWith(threadId);
-    expect(mockCommentRepository.verifyComment).toBeCalledWith(commentId, credId);
-    expect(mockCommentRepository.deleteCommentById).toBeCalledWith(credId, threadId, commentId);
+    expect(mockCommentRepository.verifyCommentOwner).toBeCalledWith(commentId, credId);
+    expect(mockCommentRepository.deleteCommentById).toBeCalledWith(commentId);
   });
 });

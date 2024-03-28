@@ -7,6 +7,7 @@ const pool = require('../../database/postgres/pool');
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
+// const Comment = require('../../../Domains/threads/entities/Comment');
 
 describe('ThreadRepositoryPostgres', () => {
   let userId;
@@ -73,23 +74,25 @@ describe('ThreadRepositoryPostgres', () => {
         .toThrowError(InvariantError);
     });
 
-    it('should return id, title, body, date, owner when thread is found', async () => {
+    it('should return id, title, body, date, username when thread is found', async () => {
       // Arrange
+      const { username: user } = await UsersTableTestHelper.findUsernameById(userId);
       const expectedPayload = {
         id: 'thread-123',
         title: 'test thread',
         body: 'isi dari thread',
         date: '2021-08-08T07:19:09.775Z',
-        owner: userId,
+        username: user,
+        comments: [],
       };
       const fakeIdGenerator = () => '123'; // stub!
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
       await ThreadsTableTestHelper.addThread({
-        owner: expectedPayload.owner,
+        owner: userId,
       });
 
       // Action & Assert
-      const data = await threadRepositoryPostgres.getThreadById(expectedPayload.id);
+      const data = await threadRepositoryPostgres.getThreadById([], expectedPayload.id);
       expect(data).toEqual(expectedPayload);
     });
   });
