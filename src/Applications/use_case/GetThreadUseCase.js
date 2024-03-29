@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 const Comment = require('../../Domains/threads/entities/Comment');
 const Reply = require('../../Domains/threads/entities/Reply');
+const Thread = require('../../Domains/threads/entities/Thread');
 
 class GetThreadUseCase {
   constructor({ threadRepository, threadCommentRepository, commentReplyRepository }) {
@@ -36,7 +37,19 @@ class GetThreadUseCase {
       });
     });
 
-    return this._threadRepository.getThreadById(replyByCommentId, threadId);
+    const thread = await this._threadRepository.getThreadById(threadId);
+
+    thread.comments = replyByCommentId;
+
+    return new Thread({
+      ...thread,
+      id: thread.id,
+      title: thread.title,
+      body: thread.body,
+      date: thread.date,
+      username: thread.username,
+      comments: thread.comments,
+    });
   }
 }
 

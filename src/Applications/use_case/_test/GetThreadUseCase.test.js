@@ -74,30 +74,13 @@ describe('GetThreadUseCase', () => {
         },
       ]));
     mockThreadRepository.getThreadById = jest.fn()
-      .mockImplementation(() => Promise.resolve(new Thread({
+      .mockImplementation(() => Promise.resolve({
         id: 'thread-123',
         title: 'sebuah judul',
         body: 'sebuah body',
         date: '2021-08-08T07:22:33.555Z',
         username: 'john doe',
-        comments: [
-          new Comment({
-            id: 'comment-123',
-            username: 'dicoding',
-            date: '2021-08-08T07:25:33.555Z',
-            content: 'sebuah komentar',
-            is_delete: false,
-            replies: [
-              new Reply({
-                id: 'reply-123',
-                username: 'user',
-                date: '2021-08-08T07:25:33.555Z',
-                content: 'sebuah balasan',
-                is_delete: false,
-              }),
-            ],
-          })],
-      })));
+      }));
 
     /** creating use case instance */
     const getThreadUseCase = new GetThreadUseCase({
@@ -110,10 +93,9 @@ describe('GetThreadUseCase', () => {
     const thread = await getThreadUseCase.execute(threadId);
 
     // Assert
-
     expect(mockThreadRepository.verifyThreadById).toBeCalledWith(threadId);
     expect(mockCommentRepository.getCommentByThreadId).toBeCalledWith(threadId);
-    expect(mockThreadRepository.getThreadById).toBeCalledWith([mockComment], threadId);
+    expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
     expect(mockReplyRepository.getReplyByThreadId).toBeCalledWith(threadId);
     expect(thread).toStrictEqual(mockThread);
   });

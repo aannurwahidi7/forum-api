@@ -57,7 +57,20 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
 
   async verifyComment(id) {
     const query = {
-      text: 'SELECT * FROM thread_comments WHERE id = $1',
+      text: 'SELECT 1 FROM thread_comments WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('komentar tidak ditemukan');
+    }
+  }
+
+  async verifyCommentOwner(id, owner) {
+    const query = {
+      text: 'SELECT owner FROM thread_comments WHERE id = $1',
       values: [id],
     };
 
@@ -67,11 +80,7 @@ class ThreadCommentRepositoryPostgres extends ThreadCommentRepository {
       throw new NotFoundError('komentar tidak ditemukan');
     }
 
-    return result.rows[0].owner;
-  }
-
-  async verifyCommentOwner(id, owner) {
-    const curOwner = await this.verifyComment(id);
+    const curOwner = result.rows[0].owner;
 
     if (curOwner !== owner) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');

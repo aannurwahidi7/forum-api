@@ -25,7 +25,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     return new AddedThread({ ...result.rows[0] });
   }
 
-  async getThreadById(comments, id) {
+  async getThreadById(id) {
     const query = {
       text: `SELECT
               threads.id,
@@ -45,15 +45,12 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       throw new InvariantError('id tidak ditemukan');
     }
 
-    const resultAll = result.rows[0];
-
-    resultAll.comments = comments;
-    return resultAll;
+    return result.rows[0];
   }
 
   async verifyThreadById(id) {
     const query = {
-      text: 'SELECT * FROM threads WHERE id = $1',
+      text: 'SELECT 1 FROM threads WHERE id = $1',
       values: [id],
     };
 

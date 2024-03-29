@@ -83,7 +83,6 @@ describe('ThreadRepositoryPostgres', () => {
         body: 'isi dari thread',
         date: '2021-08-08T07:19:09.775Z',
         username: user,
-        comments: [],
       };
       const fakeIdGenerator = () => '123'; // stub!
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
@@ -92,7 +91,7 @@ describe('ThreadRepositoryPostgres', () => {
       });
 
       // Action & Assert
-      const data = await threadRepositoryPostgres.getThreadById([], expectedPayload.id);
+      const data = await threadRepositoryPostgres.getThreadById(expectedPayload.id);
       expect(data).toEqual(expectedPayload);
     });
   });
