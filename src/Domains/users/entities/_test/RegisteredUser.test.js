@@ -21,10 +21,11 @@ describe('a RegisteredUser entities', () => {
     };
 
     // Action and Assert
+    expect(() => RegisteredUser(payload)).not.toThrowError('REGISTERED_USER.NOT_CONTAIN_NEEDED_PROPERTY');
     expect(() => new RegisteredUser(payload)).toThrowError('REGISTERED_USER.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
-  it('should create registeredUser object correctly', () => {
+  it('should create registeredUser object correctly not Throw Error', () => {
     // Arrange
     const payload = {
       id: 'user-123',
@@ -39,5 +40,6 @@ describe('a RegisteredUser entities', () => {
     expect(registeredUser.id).toEqual(payload.id);
     expect(registeredUser.username).toEqual(payload.username);
     expect(registeredUser.fullname).toEqual(payload.fullname);
+    expect(() => RegisteredUser(payload)).not.toThrowError('REGISTERED_USER.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 });

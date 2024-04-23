@@ -171,6 +171,24 @@ describe('ThreadCommentRepositoryPostgres', () => {
         .rejects
         .toThrowError(AuthorizationError);
     });
+    it('should not NotFoundError and AuthorizationError when reply found and its owner', async () => {
+      // Arrange
+      const fakeIdGenerator = () => '123'; // stub!
+      const commentReplyRepositoryPostgres = new CommentReplyRepositoryPostgres(pool, fakeIdGenerator);
+      await CommentReplyTableTestHelper.addReply({
+        owner: userId,
+        thread_id: threadId,
+        comment_id: commentId,
+      });
+
+      // Action & Assert
+      expect(commentReplyRepositoryPostgres.verifyReply('reply-123', userId))
+        .resolves.not
+        .toThrowError(NotFoundError);
+      return expect(commentReplyRepositoryPostgres.verifyReply('reply-123', userId))
+        .resolves.not
+        .toThrowError(AuthorizationError);
+    });
   });
 
   describe('getReplyByThreadId', () => {

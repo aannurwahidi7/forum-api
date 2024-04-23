@@ -146,6 +146,18 @@ describe('ThreadCommentRepositoryPostgres', () => {
         .rejects
         .toThrowError(NotFoundError);
     });
+    it('should not throw NotFoundError when comment is found', async () => {
+      // Arrange
+      const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, {});
+      await ThreadCommentsTableTestHelper.addComment({
+        thread_id: threadId,
+        owner: userId,
+      });
+      // Action & Assert
+      return expect(threadCommentRepositoryPostgres.verifyComment('comment-123'))
+        .resolves.not
+        .toThrowError(NotFoundError);
+    });
   });
 
   describe('getCommentByThreadId', () => {
@@ -173,6 +185,17 @@ describe('ThreadCommentRepositoryPostgres', () => {
   });
 
   describe('verifyCommentOwner', () => {
+    it('should throw NotFoundError when comment not found', async () => {
+      // Arrange
+      const fakeIdGenerator = () => '123'; // stub!
+      const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action & Assert
+      return expect(threadCommentRepositoryPostgres.verifyCommentOwner('comment-123', 'user-321'))
+        .rejects
+        .toThrowError(NotFoundError);
+    });
+
     it('should throw AuthorizationError when other user try to accessing to it', async () => {
       // Arrange
       const fakeIdGenerator = () => '123'; // stub!
@@ -185,6 +208,23 @@ describe('ThreadCommentRepositoryPostgres', () => {
       // Action & Assert
       return expect(threadCommentRepositoryPostgres.verifyCommentOwner('comment-123', 'user-321'))
         .rejects
+        .toThrowError(AuthorizationError);
+    });
+    it('should not throw NotFoundError and AuthorizationError when comment found and its owner', async () => {
+      // Arrange
+      const fakeIdGenerator = () => '123'; // stub!
+      const threadCommentRepositoryPostgres = new ThreadCommentRepositoryPostgres(pool, fakeIdGenerator);
+      await ThreadCommentsTableTestHelper.addComment({
+        owner: userId,
+        thread_id: threadId,
+      });
+
+      // Action & Assert
+      expect(threadCommentRepositoryPostgres.verifyCommentOwner('comment-123', userId))
+        .resolves.not
+        .toThrowError(NotFoundError);
+      return expect(threadCommentRepositoryPostgres.verifyCommentOwner('comment-123', userId))
+        .resolves.not
         .toThrowError(AuthorizationError);
     });
   });

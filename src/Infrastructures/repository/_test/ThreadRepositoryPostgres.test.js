@@ -106,5 +106,17 @@ describe('ThreadRepositoryPostgres', () => {
         .rejects
         .toThrowError(NotFoundError);
     });
+    it('should not throw NotFound when thread is found', async () => {
+      // Arrange
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+      await ThreadsTableTestHelper.addThread({
+        owner: userId,
+      });
+
+      // Action & Assert
+      return expect(threadRepositoryPostgres.verifyThreadById('thread-123'))
+        .resolves.not
+        .toThrowError(NotFoundError);
+    });
   });
 });
