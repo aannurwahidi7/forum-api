@@ -1,3 +1,4 @@
+const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const CommentLikeRepository = require('../../Domains/threads/CommentLikesRepository');
 
 class CommentLikeRepositoryPostgres extends CommentLikeRepository {
@@ -27,6 +28,33 @@ class CommentLikeRepositoryPostgres extends CommentLikeRepository {
     const result = await this._pool.query(query);
 
     return result.rows[0];
+  }
+
+  async deleteLikeByUserIdCommentId(owner, commentId) {
+    const query = {
+      text: 'DELETE FROM likes WHERE owner = $1 AND comment_id = $2 RETURNING id',
+      values: [owner, commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('like tidak ditemukan');
+    }
+  }
+
+  async verifyLike(owner, commentId) {
+    const query = {
+      text: 'SELECT 1 FROM likes WHERE owner = $1 AND comment_id = $2',
+      values: [owner, commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      return false;
+    }
+    return true;
   }
 }
 
