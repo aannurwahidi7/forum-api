@@ -9,20 +9,22 @@ class Comment {
     this.date = payload.date;
     this.content = (payload.is_delete) ? '**komentar telah dihapus**' : payload.content;
     this.replies = payload.replies;
+    this.likeCount = payload.likeCount;
   }
 
   _verifyPayload(payload) {
     const {
-      id, username, date, content, replies, is_delete,
+      id, username, date, content, replies, is_delete, likeCount,
     } = payload;
 
-    if (!id || !username || !date || !content || !replies || is_delete === undefined) {
+    if (!id || !username || !date || !content || !replies || is_delete === undefined
+      || likeCount === undefined) {
       throw new Error('COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
     if (typeof id !== 'string' || typeof username !== 'string'
     || typeof date !== 'string' || typeof content !== 'string' || typeof replies !== 'object'
-    || typeof is_delete !== 'boolean') {
+    || typeof is_delete !== 'boolean' || typeof likeCount !== 'number') {
       throw new Error('COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }

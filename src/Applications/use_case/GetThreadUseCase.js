@@ -4,10 +4,13 @@ const Reply = require('../../Domains/threads/entities/Reply');
 const Thread = require('../../Domains/threads/entities/Thread');
 
 class GetThreadUseCase {
-  constructor({ threadRepository, threadCommentRepository, commentReplyRepository }) {
+  constructor({
+    threadRepository, threadCommentRepository, commentReplyRepository, commentLikeRepository,
+  }) {
     this._threadRepository = threadRepository;
     this._threadCommentRepository = threadCommentRepository;
     this._commentReplyRepository = commentReplyRepository;
+    this._commentLikeRepository = commentLikeRepository;
   }
 
   async execute(threadId) {
@@ -16,7 +19,7 @@ class GetThreadUseCase {
     const comments = await this._threadCommentRepository.getCommentByThreadId(threadId);
     const replies = await this._commentReplyRepository.getReplyByThreadId(threadId);
 
-    const replyByCommentId = comments.map((comment) => {
+    const replyByCommentId = await Promise.all(comments.map(async (comment) => {
       const reps = replies.filter((reply) => reply.comment_id === comment.id)
         .map((reply) => (new Reply({
           ...reply,
@@ -26,6 +29,8 @@ class GetThreadUseCase {
           content: reply.content,
           is_delete: reply.is_delete,
         })));
+      const likeCountComment = await this._commentLikeRepository
+        .getLikeCountByCommentId(comment.id);
       return new Comment({
         ...comment,
         id: comment.id,
@@ -34,8 +39,9 @@ class GetThreadUseCase {
         content: comment.content,
         is_delete: comment.is_delete,
         replies: reps,
+        likeCount: parseInt(likeCountComment.like_count, 10),
       });
-    });
+    }));
 
     const thread = await this._threadRepository.getThreadById(threadId);
 

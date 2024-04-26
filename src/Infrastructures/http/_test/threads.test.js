@@ -149,6 +149,14 @@ describe('/threads endpoint', () => {
         },
       });
 
+      await server.inject({
+        method: 'PUT',
+        url: `/threads/${threadId}/comments/${commentId}/likes`,
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
       const replyJson = JSON.parse(replyResponse.payload);
       const replyId = replyJson.data.addedReply.id;
 
@@ -171,6 +179,120 @@ describe('/threads endpoint', () => {
             username: 'dicoding',
             date: dateComment,
             content: 'sebuah komentar',
+            likeCount: 1,
+            replies: [
+              {
+                id: replyId,
+                username: 'dicoding',
+                date: dateReply,
+                content: 'sebuah balasan 1',
+              },
+            ],
+          },
+        ],
+      };
+
+      const responseGet = await server.inject({
+        method: 'GET',
+        url: `/threads/${threadId}`,
+      });
+
+      // Assert
+      const responseGetJson = JSON.parse(responseGet.payload);
+      expect(responseGet.statusCode).toEqual(200);
+      expect(responseGetJson.status).toEqual('success');
+      expect(responseGetJson.data.thread).toBeDefined();
+      expect(responseGetJson.data.thread).toStrictEqual(expectedPayload);
+    });
+
+    it('should return 200 and persisted object thread and if user like two times', async () => {
+      // Arrange
+      const requestPayload = {
+        title: 'Sebuah title',
+        body: 'Sebuah body',
+      };
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        url: '/threads',
+        payload: requestPayload,
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const responseJson = JSON.parse(response.payload);
+      const threadId = responseJson.data.addedThread.id;
+
+      const commentPayload = {
+        content: 'sebuah komentar',
+      };
+
+      const commentResp = await server.inject({
+        method: 'POST',
+        url: `/threads/${threadId}/comments`,
+        payload: commentPayload,
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const commentJson = JSON.parse(commentResp.payload);
+      const commentId = commentJson.data.addedComment.id;
+      const replyPayload = {
+        content: 'sebuah balasan 1',
+      };
+
+      const replyResponse = await server.inject({
+        method: 'POST',
+        url: `/threads/${threadId}/comments/${commentId}/replies`,
+        payload: replyPayload,
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      await server.inject({
+        method: 'PUT',
+        url: `/threads/${threadId}/comments/${commentId}/likes`,
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      await server.inject({
+        method: 'PUT',
+        url: `/threads/${threadId}/comments/${commentId}/likes`,
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const replyJson = JSON.parse(replyResponse.payload);
+      const replyId = replyJson.data.addedReply.id;
+
+      const thread = await ThreadsTableTestHelper.findThreadById(threadId);
+      const dateThread = thread[0].date;
+      const comment = await ThreadCommentsTableTestHelper.findCommentById(commentId);
+      const dateComment = comment[0].date;
+      const reply = await CommentReplyTableTestHelper.findReplyById(replyId);
+      const dateReply = reply[0].date;
+
+      const expectedPayload = {
+        id: threadId,
+        title: 'Sebuah title',
+        body: 'Sebuah body',
+        date: dateThread,
+        username: 'dicoding',
+        comments: [
+          {
+            id: commentId,
+            username: 'dicoding',
+            date: dateComment,
+            content: 'sebuah komentar',
+            likeCount: 0,
             replies: [
               {
                 id: replyId,
