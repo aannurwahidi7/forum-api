@@ -42,6 +42,20 @@ class CommentLikeRepositoryPostgres extends CommentLikeRepository {
       throw new NotFoundError('like tidak ditemukan');
     }
   }
+
+  async verifyLike(owner, commentId) {
+    const query = {
+      text: 'SELECT 1 FROM likes WHERE owner = $1 AND comment_id = $2',
+      values: [owner, commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      return false;
+    }
+    return true;
+  }
 }
 
 module.exports = CommentLikeRepositoryPostgres;
