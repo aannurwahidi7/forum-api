@@ -18,8 +18,8 @@ jobs:
       postgres:
         image: postgres
         env:
-         POSTGRES_USER: ${{ secrets.PGPASSWORD_TEST }}
-         POSTGRES_PASSWORD: ${{ secrets.PGDATABASE_TEST }}
+         POSTGRES_USER: developer
+         POSTGRES_PASSWORD: passwordsalah
          POSTGRES_DB: forumapi_test
          
         options: >-
