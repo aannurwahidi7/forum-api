@@ -20,6 +20,7 @@ describe('Comment', () => {
       username: 123,
       date: 123,
       content: 10,
+      likeCount: 1,
       replies: [],
       is_delete: 'true',
     };
@@ -35,6 +36,7 @@ describe('Comment', () => {
       username: 'username',
       date: '2021-08-08T07:22:33.555Z',
       content: 'sebuah komentar',
+      likeCount: 1,
       replies: [],
       is_delete: false,
     };
@@ -48,6 +50,7 @@ describe('Comment', () => {
     expect(comment.username).toEqual(payload.username);
     expect(comment.date).toEqual(payload.date);
     expect(comment.content).toEqual(payload.content);
+    expect(comment.likeCount).toEqual(payload.likeCount);
     expect(comment.replies).toEqual(payload.replies);
     expect(comment.is_delete).toEqual(undefined);
   });
@@ -58,6 +61,7 @@ describe('Comment', () => {
       username: 'username',
       date: '2021-08-08T07:22:33.555Z',
       content: 'sebuah komentar',
+      likeCount: 1,
       replies: [],
       is_delete: true,
     };
@@ -73,6 +77,7 @@ describe('Comment', () => {
     expect(comment.username).toEqual(payload.username);
     expect(comment.date).toEqual(payload.date);
     expect(comment.content).toEqual(actualContent);
+    expect(comment.likeCount).toEqual(payload.likeCount);
     expect(comment.replies).toEqual(payload.replies);
     expect(comment.is_delete).toEqual(undefined);
   });
