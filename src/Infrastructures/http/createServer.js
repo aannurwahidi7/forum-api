@@ -1,5 +1,8 @@
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const HapiSwagger = require('hapi-swagger');
+const Inert = require('@hapi/inert');
+const Vision = require('@hapi/vision');
 
 const ClientError = require('../../Commons/exceptions/ClientError');
 const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
@@ -20,6 +23,13 @@ const createServer = async (container) => {
     },
   ]);
 
+  const swaggerOptions = {
+    info: {
+      title: 'Forum API Documentation',
+      version: '1.0.0',
+    },
+  };
+
   server.auth.strategy('forumapi_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
     verify: {
@@ -36,6 +46,12 @@ const createServer = async (container) => {
     }),
   });
 
+  server.route({
+    method: 'GET',
+    path: '/',
+    handler: (request, h) => h.redirect('/documentation'),
+  });
+
   await server.register([
     {
       plugin: users,
@@ -48,6 +64,16 @@ const createServer = async (container) => {
     {
       plugin: threads,
       options: { container },
+    },
+    {
+      plugin: Inert,
+    },
+    {
+      plugin: Vision,
+    },
+    {
+      plugin: HapiSwagger,
+      options: swaggerOptions,
     },
   ]);
 
